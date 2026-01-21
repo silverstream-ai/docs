@@ -1,97 +1,70 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Bench"
+description: "Debug agent failures in minutes, not hours"
 ---
 
-## Setting up
+## What is Bench?
 
-Get your documentation site up and running in minutes.
+Bench is a debugging tool for AI agents. It captures synchronized video, DOM snapshots, and execution traces so you can see exactly what your agent saw when it failed.
 
 <Card
-  title="Start here"
+  title="Quickstart"
   icon="rocket"
   href="/quickstart"
   horizontal
 >
-  Follow our three step quickstart guide.
+  Get Bench running in under 5 minutes.
 </Card>
 
-## Make it yours
+## Why Bench?
 
-Design a docs site that looks great and empowers your users.
+When an agent fails, you're left guessing:
+- What did it see?
+- What did it click?
+- Why did it choose that action?
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
+Bench gives you **visual replay** of every agent run, synced with the execution trace. No more guessing.
 
-## Create beautiful pages
+## Core Features
 
-Everything you need to create world-class documentation.
+<CardGroup cols={2}>
+  <Card title="Visual Replay" icon="play" href="/quickstart">
+    Watch your agent's run frame-by-frame with DOM overlay.
+  </Card>
+  <Card title="Trace Sync" icon="timeline" href="/how-to-record-a-run">
+    See LLM decisions alongside what the agent saw.
+  </Card>
+  <Card title="Quick Integration" icon="plug" href="/quickstart#install">
+    One line to add Bench to your agent.
+  </Card>
+  <Card title="OpenTelemetry" icon="signal-stream" href="/api-reference/introduction">
+    Works with your existing observability stack.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## Get Started
 
-## Need inspiration?
+<Steps>
+  <Step title="Install the SDK">
+    ```bash
+    pip install bench-sdk
+    ```
+  </Step>
+  <Step title="Wrap your agent">
+    ```python
+    from bench import Bench
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+    bench = Bench(api_key="your-api-key")
+
+    with bench.record():
+        agent.run(task)
+    ```
+  </Step>
+  <Step title="View the replay">
+    Open the Bench dashboard to see your agent's run.
+  </Step>
+</Steps>
+
+<Note>
+  Need help? [Join our Discord](https://discord.gg/silverstream) or email support@silverstream.ai
+</Note>

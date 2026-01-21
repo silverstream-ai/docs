@@ -1,0 +1,266 @@
+---
+title: "How to Record a Run"
+description: "Capture agent sessions for debugging with Bench"
+---
+
+## Overview
+
+Recording a run captures everything your agent does:
+- Screenshots at each action
+- DOM state changes
+- Mouse/keyboard events
+- LLM decisions and reasoning
+- Network requests
+
+This guide covers advanced recording options beyond the [Quickstart](/quickstart).
+
+## Recording Modes
+
+### Automatic Mode
+
+Bench automatically detects browser instances and records them:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+with bench.record(auto_detect=True):
+    # Any browser launched here is recorded
+    agent.run(task)
+```
+
+### Explicit Mode
+
+Pass the browser/page directly for precise control:
+
+```python
+from bench import Bench
+from playwright.sync_api import sync_playwright
+
+bench = Bench(api_key="your-api-key")
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page()
+
+    with bench.record(page=page):
+        page.goto("https://example.com")
+```
+
+## Recording Options
+
+### Metadata
+
+Add context to your recordings:
+
+```python
+with bench.record(
+    name="Flight booking test",
+    tags=["booking", "flights", "production"],
+    metadata={
+        "user_id": "test-123",
+        "environment": "staging"
+    }
+):
+    agent.run(task)
+```
+
+### Screenshot Frequency
+
+Control how often screenshots are captured:
+
+```python
+with bench.record(
+    screenshot_interval=0.5,  # Every 500ms
+    screenshot_on_action=True  # Also capture on each action
+):
+    agent.run(task)
+```
+
+### Network Capture
+
+Record API calls your agent makes:
+
+```python
+with bench.record(
+    capture_network=True,
+    capture_request_body=True,
+    capture_response_body=True
+):
+    agent.run(task)
+```
+
+<Warning>
+  Be careful with `capture_response_body` - large responses can increase storage usage.
+</Warning>
+
+### Console Logs
+
+Capture browser console output:
+
+```python
+with bench.record(
+    capture_console=True,
+    console_levels=["error", "warn", "log"]
+):
+    agent.run(task)
+```
+
+## LLM Trace Integration
+
+### OpenTelemetry
+
+Bench integrates with OpenTelemetry to capture LLM calls:
+
+```python
+from bench import Bench
+from opentelemetry import trace
+
+bench = Bench(api_key="your-api-key")
+
+with bench.record(otel_enabled=True):
+    # LLM calls are automatically traced
+    response = openai.chat.completions.create(
+        model="gpt-4",
+        messages=[{"role": "user", "content": "Hello"}]
+    )
+```
+
+### Manual Spans
+
+Add custom spans to your trace:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+with bench.record() as session:
+    with session.span("parsing_task"):
+        task = parse_user_input(raw_input)
+
+    with session.span("agent_execution"):
+        result = agent.run(task)
+```
+
+## Multi-Page Recording
+
+Record across multiple browser tabs:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+with bench.record() as session:
+    page1 = browser.new_page()
+    session.add_page(page1)
+
+    page2 = browser.new_page()
+    session.add_page(page2)
+
+    # Both pages are recorded
+```
+
+## Conditional Recording
+
+Only record when certain conditions are met:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+def should_record():
+    return os.getenv("RECORD_RUNS", "false") == "true"
+
+if should_record():
+    ctx = bench.record()
+else:
+    ctx = nullcontext()
+
+with ctx:
+    agent.run(task)
+```
+
+## Async Support
+
+For async agents:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+async def run():
+    async with bench.record_async():
+        await agent.run(task)
+```
+
+## Viewing Recordings
+
+### Dashboard
+
+1. Go to [app.silverstream.ai](https://app.silverstream.ai)
+2. Click on your recording
+3. Use the timeline to scrub through the run
+
+### Programmatic Access
+
+Fetch recording data via API:
+
+```python
+from bench import Bench
+
+bench = Bench(api_key="your-api-key")
+
+recording = bench.get_recording(recording_id="rec_123")
+print(recording.duration)
+print(recording.steps)
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Name your recordings" icon="tag">
+    Use descriptive names so you can find them later.
+  </Card>
+  <Card title="Add tags" icon="tags">
+    Tag by test type, environment, or feature area.
+  </Card>
+  <Card title="Record failures" icon="circle-exclamation">
+    Always record - failures are where Bench shines.
+  </Card>
+  <Card title="Use metadata" icon="database">
+    Include user IDs, test IDs, git commits for traceability.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Recording is empty">
+    - Ensure `bench.record()` wraps your agent code
+    - Check that the browser instance is passed correctly
+    - Verify `auto_detect=True` if not passing explicitly
+  </Accordion>
+
+  <Accordion title="LLM calls not appearing">
+    - Enable OpenTelemetry: `otel_enabled=True`
+    - Ensure your LLM client is instrumented
+    - Check that spans are created within the recording context
+  </Accordion>
+
+  <Accordion title="Large recording files">
+    - Reduce `screenshot_interval`
+    - Disable `capture_response_body` for large API responses
+    - Use `capture_console=False` if console is noisy
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<Card title="API Reference" icon="code" href="/api-reference/introduction">
+  Full SDK documentation with all options.
+</Card>
