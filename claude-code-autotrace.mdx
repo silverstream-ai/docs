@@ -1,228 +1,54 @@
 ---
-title: "Claude Code AutoTrace"
-description: "Record Claude Code CLI sessions to Bench"
+title: 'Quickstart: Tracing Claude Code'
+description: 'Learn how to configure Silverstream Bench to track and analyze your CLI agent sessions.'
 ---
 
-## Overview
+## Setting up Telemetry
 
-The AutoTrace hooks capture Claude Code CLI sessions and send OpenTelemetry data to Bench. This lets you record and replay agent sessions for debugging and analysis.
+Follow these steps to connect your local Claude Code agent to the Silverstream Bench dashboard.
 
-## Prerequisites
+<Steps>
+  <Step title="Create a Tracking Endpoint">
+    Navigate to the **Settings** tab in your Silverstream Bench dashboard.
+    
+    1. Enter a unique identifier in the **Tracker Name** field (e.g., `hello-silverstream`).
+    2. Click **Save**.
+    3. Keep the generated **Configuration Prompt** handy for the next step.
+  </Step>
 
-- Python 3.9+
-- A Bench API key ([get one here](https://landing.silverstream.ai))
-- Claude Code CLI installed
+  <Step title="Configure the Agent">
+    Open your terminal and use the provided repository to bootstrap the agent's environment.
 
-## Install
+    ```bash
+    git clone [https://github.com/silverstream-ai/claude-bench-autotrace](https://github.com/silverstream-ai/claude-bench-autotrace)
+    cd claude-bench-autotrace
+    claude
+    ```
 
-Clone the silverstream repository and install dependencies:
+    Once the Claude CLI is running, paste the configuration prompt generated in Step 1:
 
-```bash
-git clone https://github.com/silverstream-ai/silverstream.git
-cd silverstream
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e ".[hooks]"
-```
+    ```text
+    Configure yourself to send telemetry to bench (code: 7b3e322c...)
+    ```
+    
+    <Note>
+      The agent will automatically create a virtual environment and a `.env` file containing your `CLAUDE_CODE_ENDPOINT_CODE` and `CLAUDE_CODE_COLLECTOR_BASE_URL`.
+    </Note>
+  </Step>
 
-## Configure Environment
+  <Step title="Run Agent Tasks">
+    interact with the agent normally. Silverstream captures tool calls and reasoning traces in the background.
 
-Create `.claude/.env` in the cloned repository:
+    **Example Prompt:**
+    > "Look up for me if tomorrow will rain in Rome! What the temperature will be like?"
+  </Step>
 
-```bash
-cd silverstream
-cat > .claude/.env << 'EOF'
-CLAUDE_CODE_ENDPOINT_CODE=your-bench-api-key
-EOF
-```
-
-<Note>
-  Replace `your-bench-api-key` with your actual Bench API key from the dashboard.
-</Note>
-
-Optionally, set a custom collector URL if you're self-hosting:
-
-```bash
-CLAUDE_CODE_COLLECTOR_BASE_URL=https://your-collector.example.com
-```
-
-## Install Hook Globally
-
-To trace Claude Code sessions from any directory, configure the hooks in your global settings file `~/.claude/settings.json`.
-
-Create or edit the file with the following configuration, replacing `/path/to/silverstream` with the actual path to your cloned repository:
-
-<CodeGroup>
-```json ~/.claude/settings.json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"/path/to/silverstream/.claude/hooks/run_cc_tracer.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-</CodeGroup>
-
-<Warning>
-  Use absolute paths in the global settings. The `$CLAUDE_PROJECT_DIR` variable only works within project-specific `.claude/settings.json` files.
-</Warning>
-
-## Restart Claude Session
-
-Exit any running Claude Code sessions and restart for the hooks to take effect:
-
-```bash
-claude
-```
-
-On the first session start, you'll see a log message confirming the hooks are active if configured correctly.
-
-## View Your Recordings
-
-After running Claude Code sessions:
-
-1. Open the [Bench Dashboard](https://app.silverstream.ai)
-2. Find your Claude Code session in the list
-3. Click to view the trace timeline with tool calls and agent decisions
-
-## What Gets Recorded?
-
-| Data | Description |
-|------|-------------|
-| Tool calls | Every tool invocation (Read, Write, Bash, etc.) |
-| Tool results | Outputs from each tool |
-| User prompts | Your messages to Claude |
-| Session metadata | Timestamps, working directory, session IDs |
-| Agent decisions | Stop reasons and flow control |
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Hooks not running">
-    - Verify `~/.claude/settings.json` syntax is valid JSON
-    - Check that paths to `run_cc_tracer.sh` are absolute and correct
-    - Ensure the virtualenv exists at `/path/to/silverstream/.venv`
-  </Accordion>
-
-  <Accordion title="Sessions not appearing in Bench">
-    - Verify `CLAUDE_CODE_ENDPOINT_CODE` is set in `.claude/.env`
-    - Check network connectivity to the collector endpoint
-    - Look for errors in `ss_claude_trace_hook.log` in the hooks directory
-  </Accordion>
-
-  <Accordion title="Permission errors">
-    - Ensure `run_cc_tracer.sh` is executable: `chmod +x /path/to/silverstream/.claude/hooks/run_cc_tracer.sh`
-    - Verify Python virtualenv has the required dependencies installed
-  </Accordion>
-</AccordionGroup>
-
-## Next Steps
-
-<CardGroup cols={2}>
-  <Card title="How to Record a Run" icon="circle-play" href="/how-to-record-a-run">
-    Learn about advanced recording options.
-  </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/introduction">
-    Full SDK documentation.
-  </Card>
-</CardGroup>
+  <Step title="Analyze in Dashboard">
+    Return to Silverstream Bench and click on **Last runs**. Select a session to enter the **Deep Dive** view.
+    
+    You can now inspect:
+    * **Step-by-step execution:** See exactly when the agent used `WebSearch` or `Bash` tools.
+    * **Latency data:** Review how long each step took.
+    * **Chat Tree:** A visual representation of the message flow.
+  </Step>
+</Steps>
