@@ -1,0 +1,55 @@
+---
+title: 'Quickstart: Tracing Claude Code'
+description: 'Learn how to configure Silverstream Bench to track and analyze your CLI agent sessions.'
+---
+
+## Setting up Telemetry
+
+Follow these steps to connect your local Claude Code agent to the Silverstream Bench dashboard.
+
+<Steps>
+  <Step title="Create a Tracking Endpoint">
+    Navigate to the **Settings** tab in your Silverstream Bench dashboard.
+    
+    1. Enter a unique identifier in the **Tracker Name** field (e.g., `hello-silverstream`).
+    2. Click **Save**.
+    3. Keep the generated **Configuration Prompt** handy for the next step.
+  </Step>
+
+  <Step title="Configure the Agent">
+    Open your terminal and use the provided repository to bootstrap the agent's environment.
+
+    ```bash
+    git clone [https://github.com/silverstream-ai/claude-bench-autotrace](https://github.com/silverstream-ai/claude-bench-autotrace)
+    cd claude-bench-autotrace
+    claude
+    ```
+
+    Once the Claude CLI is running, paste the configuration prompt generated in Step 1:
+
+    ```text
+    Configure yourself to send telemetry to bench (code: 7b3e322c...)
+    ```
+    
+    <Note>
+      The agent will automatically create a virtual environment and a `.env` file containing your `CLAUDE_CODE_ENDPOINT_CODE` and `CLAUDE_CODE_COLLECTOR_BASE_URL`.
+    </Note>
+  </Step>
+
+  <Step title="Run Agent Tasks">
+    interact with the agent normally. Silverstream captures tool calls and reasoning traces in the background.
+
+    **Example Prompt:**
+    > "Look up for me if tomorrow will rain in Rome! What the temperature will be like?"
+  </Step>
+
+  <Step title="Analyze in Dashboard">
+    Return to Silverstream Bench and click on **Last runs**. Select a session to enter the **Deep Dive** view.
+    
+    You can now inspect:
+    * **Step-by-step execution:** See exactly when the agent used `WebSearch` or `Bash` tools.
+    * **Latency data:** Review how long each step took.
+    * **Chat Tree:** A visual representation of the message flow.
+  </Step>
+</Steps>
+

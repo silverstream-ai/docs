@@ -18,7 +18,8 @@
             "pages": [
               "index",
               "quickstart",
-              "how-to-record-a-run"
+              "how-to-record-a-run",
+              "claude-code-autotrace"
             ]
           }
         ]
